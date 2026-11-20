@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Burger Prime — Cardápio Digital</title>
+    <meta
+      name="description"
+      content="Peça hambúrgueres artesanais na brasa, combos, porções e milkshakes da Burger Prime direto pelo WhatsApp."
+    />
+    <meta property="og:title" content="Burger Prime — Cardápio Digital" />
+    <meta
+      property="og:description"
+      content="Hambúrgueres artesanais na brasa, pão brioche e molhos da casa. Faça seu pedido rápido pelo WhatsApp."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('burger_prime_theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (saved === 'dark' || (!saved && prefersDark)) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body class="bg-[#FAF9F7] text-[#181615] dark:bg-[#111010] dark:text-[#F6F4F0] antialiased selection:bg-[var(--brand-primary-soft)]">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

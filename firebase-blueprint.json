@@ -1,0 +1,199 @@
+{
+  "entities": {
+    "Order": {
+      "title": "Order",
+      "description": "Pedido em tempo real salvo pelo cliente e exibido no Painel da Cozinha.",
+      "type": "object",
+      "properties": {
+        "numeroPedido": { "type": "integer", "description": "Número sequencial do pedido." },
+        "codigoPedido": { "type": "string", "minLength": 2, "maxLength": 20, "pattern": "^#[0-9]{1,8}$" },
+        "clienteNome": { "type": "string", "minLength": 2, "maxLength": 100 },
+        "clienteWhatsapp": { "type": "string", "maxLength": 30 },
+        "tipoPedido": { "type": "string", "enum": ["entrega", "retirada"] },
+        "rua": { "type": "string", "maxLength": 140 },
+        "numero": { "type": "string", "maxLength": 30 },
+        "complemento": { "type": "string", "maxLength": 100 },
+        "endereco": { "type": "string", "maxLength": 260 },
+        "bairroNome": { "type": "string", "maxLength": 100 },
+        "pontoReferencia": { "type": "string", "maxLength": 160 },
+        "itens": { "type": "array", "description": "Itens do pedido (máx 40)." },
+        "subtotal": { "type": "number" },
+        "taxaEntrega": { "type": "number" },
+        "taxaACombinar": { "type": "boolean" },
+        "total": { "type": "number" },
+        "pagamento": { "type": "string", "enum": ["pix", "pix_entrega", "cartao", "dinheiro"] },
+        "trocoPara": { "type": "string", "maxLength": 40 },
+        "semTroco": { "type": "boolean" },
+        "pixStatus": { "type": "string", "enum": ["nao_aplicavel", "aguardando_comprovante", "confirmado"] },
+        "pixConfirmadoPor": { "type": "string", "enum": ["", "cliente_declarado", "caixa_manual"] },
+        "pixResumoVerificacao": { "type": "string", "maxLength": 240 },
+        "status": { "type": "string", "enum": ["novo", "em_preparo", "saiu_entrega", "concluido", "cancelado"] },
+        "impresso": { "type": "boolean" },
+        "impressoCount": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "numeroPedido",
+        "codigoPedido",
+        "clienteNome",
+        "clienteWhatsapp",
+        "tipoPedido",
+        "rua",
+        "numero",
+        "complemento",
+        "endereco",
+        "bairroNome",
+        "pontoReferencia",
+        "itens",
+        "subtotal",
+        "taxaEntrega",
+        "taxaACombinar",
+        "total",
+        "pagamento",
+        "trocoPara",
+        "semTroco",
+        "pixStatus",
+        "pixConfirmadoPor",
+        "pixResumoVerificacao",
+        "status",
+        "impresso",
+        "impressoCount",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "MenuProduct": {
+      "title": "MenuProduct",
+      "description": "Produto do cardápio gerenciado pelo painel admin e exibido no cardápio público.",
+      "type": "object",
+      "properties": {
+        "nome": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "descricao": { "type": "string", "maxLength": 500 },
+        "preco": { "type": "number" },
+        "categoria": { "type": "string", "enum": ["hamburgueres", "combos", "porcoes", "bebidas", "sobremesas"] },
+        "imagem": { "type": "string", "maxLength": 500 },
+        "etiqueta": { "type": "string", "enum": ["", "Mais pedido", "Novo"] },
+        "destaque": { "type": "boolean" },
+        "ativo": { "type": "boolean" },
+        "permitePontoCarne": { "type": "boolean" },
+        "opcoesObrigatorias": { "type": "array" },
+        "permiteAdicionais": { "type": "boolean" },
+        "adicionaisCustom": { "type": "array" },
+        "ingredientesRemoviveis": { "type": "array" },
+        "ordem": { "type": "integer" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "nome",
+        "descricao",
+        "preco",
+        "categoria",
+        "imagem",
+        "etiqueta",
+        "destaque",
+        "ativo",
+        "permitePontoCarne",
+        "opcoesObrigatorias",
+        "permiteAdicionais",
+        "adicionaisCustom",
+        "ingredientesRemoviveis",
+        "ordem",
+        "updatedAt"
+      ]
+    },
+    "StoreSettingsDoc": {
+      "title": "StoreSettingsDoc",
+      "description": "Configurações públicas da loja, status aberto/fechado, Pix, bairros e preferências da impressora.",
+      "type": "object",
+      "properties": {
+        "nome": { "type": "string", "minLength": 2, "maxLength": 100 },
+        "slogan": { "type": "string", "maxLength": 200 },
+        "abertoManual": { "type": "boolean" },
+        "whatsapp": { "type": "string", "maxLength": 30 },
+        "enderecoRetirada": { "type": "string", "maxLength": 200 },
+        "cidadeUf": { "type": "string", "maxLength": 80 },
+        "tempoEstimadoEntrega": { "type": "string", "maxLength": 40 },
+        "tempoEstimadoRetirada": { "type": "string", "maxLength": 40 },
+        "pedidoMinimo": { "type": "number" },
+        "resumoHorario": { "type": "string", "maxLength": 140 },
+        "pixChave": { "type": "string", "maxLength": 140 },
+        "pixNomeRecebedor": { "type": "string", "maxLength": 60 },
+        "pixCidadeRecebedor": { "type": "string", "maxLength": 40 },
+        "bairrosEntrega": { "type": "array" },
+        "autoPrintEnabled": { "type": "boolean" },
+        "autoPrintPendingPix": { "type": "boolean" },
+        "soundEnabled": { "type": "boolean" },
+        "paperWidth": { "type": "string", "enum": ["80mm", "58mm"] },
+        "copies": { "type": "integer" },
+        "storeFooterNote": { "type": "string", "maxLength": 140 },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "nome",
+        "slogan",
+        "abertoManual",
+        "whatsapp",
+        "enderecoRetirada",
+        "cidadeUf",
+        "tempoEstimadoEntrega",
+        "tempoEstimadoRetirada",
+        "pedidoMinimo",
+        "resumoHorario",
+        "pixChave",
+        "pixNomeRecebedor",
+        "pixCidadeRecebedor",
+        "bairrosEntrega",
+        "autoPrintEnabled",
+        "autoPrintPendingPix",
+        "soundEnabled",
+        "paperWidth",
+        "copies",
+        "storeFooterNote",
+        "updatedAt"
+      ]
+    },
+    "AdminAuthConfig": {
+      "title": "AdminAuthConfig",
+      "description": "Hash SHA-256 da senha de acesso ao Painel Admin.",
+      "type": "object",
+      "properties": {
+        "passHash": { "type": "string", "minLength": 16, "maxLength": 128 },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["passHash", "updatedAt"]
+    },
+    "OrderCounter": {
+      "title": "OrderCounter",
+      "description": "Contador sequencial atômico para numeração dos pedidos.",
+      "type": "object",
+      "properties": {
+        "seq": { "type": "integer" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["seq", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Pedidos em tempo real."
+    },
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/MenuProduct" },
+      "description": "Produtos do cardápio."
+    },
+    "/storeSettings/{settingId}": {
+      "schema": { "$ref": "#/entities/StoreSettingsDoc" },
+      "description": "Configurações da loja e impressora."
+    },
+    "/adminAuth/{docId}": {
+      "schema": { "$ref": "#/entities/AdminAuthConfig" },
+      "description": "Hash de senha do painel admin."
+    },
+    "/counters/{counterId}": {
+      "schema": { "$ref": "#/entities/OrderCounter" },
+      "description": "Contadores sequenciais de pedidos."
+    }
+  }
+}

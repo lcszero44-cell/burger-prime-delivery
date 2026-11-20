@@ -1,0 +1,364 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Default Deny Catch-All
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Reusable Primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidOrderItem(item) {
+      return item is map &&
+        item.keys().hasAll([
+          'nome',
+          'quantidade',
+          'precoUnitario',
+          'precoTotal',
+          'pontoCarne',
+          'adicionais',
+          'ingredientesRemovidos',
+          'observacao'
+        ]) &&
+        item.keys().hasOnly([
+          'nome',
+          'quantidade',
+          'precoUnitario',
+          'precoTotal',
+          'pontoCarne',
+          'adicionais',
+          'ingredientesRemovidos',
+          'observacao'
+        ]) &&
+        item.nome is string && item.nome.size() >= 1 && item.nome.size() <= 120 &&
+        item.quantidade is int && item.quantidade >= 1 && item.quantidade <= 50 &&
+        item.precoUnitario is number && item.precoUnitario >= 0 && item.precoUnitario <= 5000 &&
+        item.precoTotal is number && item.precoTotal >= 0 && item.precoTotal <= 50000 &&
+        item.pontoCarne is string && item.pontoCarne.size() <= 60 &&
+        item.adicionais is list && item.adicionais.size() <= 20 &&
+        (item.adicionais.size() == 0 || (item.adicionais[0] is string && item.adicionais[0].size() <= 100)) &&
+        item.ingredientesRemovidos is list && item.ingredientesRemovidos.size() <= 20 &&
+        (item.ingredientesRemovidos.size() == 0 || (item.ingredientesRemovidos[0] is string && item.ingredientesRemovidos[0].size() <= 80)) &&
+        item.observacao is string && item.observacao.size() <= 220;
+    }
+
+    function isValidOrder(data) {
+      return data.keys().hasAll([
+          'numeroPedido',
+          'codigoPedido',
+          'clienteNome',
+          'clienteWhatsapp',
+          'tipoPedido',
+          'rua',
+          'numero',
+          'complemento',
+          'endereco',
+          'bairroNome',
+          'pontoReferencia',
+          'itens',
+          'subtotal',
+          'taxaEntrega',
+          'taxaACombinar',
+          'total',
+          'pagamento',
+          'trocoPara',
+          'semTroco',
+          'pixStatus',
+          'pixConfirmadoPor',
+          'pixResumoVerificacao',
+          'status',
+          'impresso',
+          'impressoCount',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'numeroPedido',
+          'codigoPedido',
+          'clienteNome',
+          'clienteWhatsapp',
+          'tipoPedido',
+          'rua',
+          'numero',
+          'complemento',
+          'endereco',
+          'bairroNome',
+          'pontoReferencia',
+          'itens',
+          'subtotal',
+          'taxaEntrega',
+          'taxaACombinar',
+          'total',
+          'pagamento',
+          'trocoPara',
+          'semTroco',
+          'pixStatus',
+          'pixConfirmadoPor',
+          'pixResumoVerificacao',
+          'status',
+          'impresso',
+          'impressoCount',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        data.numeroPedido is int && data.numeroPedido >= 1 && data.numeroPedido <= 9999999 &&
+        data.codigoPedido is string && data.codigoPedido.size() >= 2 && data.codigoPedido.size() <= 20 &&
+        data.codigoPedido.matches('^#[0-9]{1,8}$') &&
+        data.clienteNome is string && data.clienteNome.size() >= 2 && data.clienteNome.size() <= 100 &&
+        data.clienteWhatsapp is string && data.clienteWhatsapp.size() <= 30 &&
+        data.tipoPedido in ['entrega', 'retirada'] &&
+        data.rua is string && data.rua.size() <= 140 &&
+        data.numero is string && data.numero.size() <= 30 &&
+        data.complemento is string && data.complemento.size() <= 100 &&
+        data.endereco is string && data.endereco.size() <= 260 &&
+        data.bairroNome is string && data.bairroNome.size() <= 100 &&
+        data.pontoReferencia is string && data.pontoReferencia.size() <= 160 &&
+        data.itens is list && data.itens.size() >= 1 && data.itens.size() <= 40 &&
+        isValidOrderItem(data.itens[0]) &&
+        data.subtotal is number && data.subtotal >= 0 && data.subtotal <= 50000 &&
+        data.taxaEntrega is number && data.taxaEntrega >= 0 && data.taxaEntrega <= 1000 &&
+        data.taxaACombinar is bool &&
+        data.total is number && data.total >= 0 && data.total <= 51000 &&
+        data.pagamento in ['pix', 'pix_entrega', 'cartao', 'dinheiro'] &&
+        data.trocoPara is string && data.trocoPara.size() <= 40 &&
+        data.semTroco is bool &&
+        data.pixStatus in ['nao_aplicavel', 'aguardando_comprovante', 'confirmado'] &&
+        data.pixConfirmadoPor in ['', 'cliente_declarado', 'caixa_manual'] &&
+        data.pixResumoVerificacao is string && data.pixResumoVerificacao.size() <= 240 &&
+        data.status in ['novo', 'em_preparo', 'saiu_entrega', 'concluido', 'cancelado'] &&
+        data.impresso is bool &&
+        data.impressoCount is int && data.impressoCount >= 0 && data.impressoCount <= 50 &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidProduct(data) {
+      return data.keys().hasAll([
+          'nome',
+          'descricao',
+          'preco',
+          'categoria',
+          'imagem',
+          'etiqueta',
+          'destaque',
+          'ativo',
+          'permitePontoCarne',
+          'opcoesObrigatorias',
+          'permiteAdicionais',
+          'adicionaisCustom',
+          'ingredientesRemoviveis',
+          'ordem',
+          'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'nome',
+          'descricao',
+          'preco',
+          'categoria',
+          'imagem',
+          'etiqueta',
+          'destaque',
+          'ativo',
+          'permitePontoCarne',
+          'opcoesObrigatorias',
+          'permiteAdicionais',
+          'adicionaisCustom',
+          'ingredientesRemoviveis',
+          'ordem',
+          'updatedAt'
+        ]) &&
+        data.nome is string && data.nome.size() >= 2 && data.nome.size() <= 120 &&
+        data.descricao is string && data.descricao.size() <= 500 &&
+        data.preco is number && data.preco >= 0 && data.preco <= 5000 &&
+        data.categoria in ['hamburgueres', 'combos', 'porcoes', 'bebidas', 'sobremesas'] &&
+        data.imagem is string && data.imagem.size() <= 500 &&
+        data.etiqueta in ['', 'Mais pedido', 'Novo'] &&
+        data.destaque is bool &&
+        data.ativo is bool &&
+        data.permitePontoCarne is bool &&
+        data.opcoesObrigatorias is list && data.opcoesObrigatorias.size() <= 10 &&
+        (data.opcoesObrigatorias.size() == 0 || (data.opcoesObrigatorias[0] is string && data.opcoesObrigatorias[0].size() <= 60)) &&
+        data.permiteAdicionais is bool &&
+        data.adicionaisCustom is list && data.adicionaisCustom.size() <= 20 &&
+        (data.adicionaisCustom.size() == 0 || data.adicionaisCustom[0] is map) &&
+        data.ingredientesRemoviveis is list && data.ingredientesRemoviveis.size() <= 20 &&
+        (data.ingredientesRemoviveis.size() == 0 || (data.ingredientesRemoviveis[0] is string && data.ingredientesRemoviveis[0].size() <= 60)) &&
+        data.ordem is int && data.ordem >= 0 && data.ordem <= 10000 &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidStoreSettings(data) {
+      return data.keys().hasAll([
+          'nome',
+          'slogan',
+          'abertoManual',
+          'whatsapp',
+          'enderecoRetirada',
+          'cidadeUf',
+          'tempoEstimadoEntrega',
+          'tempoEstimadoRetirada',
+          'pedidoMinimo',
+          'resumoHorario',
+          'pixChave',
+          'pixNomeRecebedor',
+          'pixCidadeRecebedor',
+          'bairrosEntrega',
+          'autoPrintEnabled',
+          'autoPrintPendingPix',
+          'soundEnabled',
+          'paperWidth',
+          'copies',
+          'storeFooterNote',
+          'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'nome',
+          'slogan',
+          'abertoManual',
+          'whatsapp',
+          'enderecoRetirada',
+          'cidadeUf',
+          'tempoEstimadoEntrega',
+          'tempoEstimadoRetirada',
+          'pedidoMinimo',
+          'resumoHorario',
+          'pixChave',
+          'pixNomeRecebedor',
+          'pixCidadeRecebedor',
+          'bairrosEntrega',
+          'autoPrintEnabled',
+          'autoPrintPendingPix',
+          'soundEnabled',
+          'paperWidth',
+          'copies',
+          'storeFooterNote',
+          'updatedAt'
+        ]) &&
+        data.nome is string && data.nome.size() >= 2 && data.nome.size() <= 100 &&
+        data.slogan is string && data.slogan.size() <= 200 &&
+        data.abertoManual is bool &&
+        data.whatsapp is string && data.whatsapp.size() <= 30 &&
+        data.enderecoRetirada is string && data.enderecoRetirada.size() <= 200 &&
+        data.cidadeUf is string && data.cidadeUf.size() <= 80 &&
+        data.tempoEstimadoEntrega is string && data.tempoEstimadoEntrega.size() <= 40 &&
+        data.tempoEstimadoRetirada is string && data.tempoEstimadoRetirada.size() <= 40 &&
+        data.pedidoMinimo is number && data.pedidoMinimo >= 0 && data.pedidoMinimo <= 5000 &&
+        data.resumoHorario is string && data.resumoHorario.size() <= 140 &&
+        data.pixChave is string && data.pixChave.size() <= 140 &&
+        data.pixNomeRecebedor is string && data.pixNomeRecebedor.size() <= 60 &&
+        data.pixCidadeRecebedor is string && data.pixCidadeRecebedor.size() <= 40 &&
+        data.bairrosEntrega is list && data.bairrosEntrega.size() <= 80 &&
+        (data.bairrosEntrega.size() == 0 || data.bairrosEntrega[0] is map) &&
+        data.autoPrintEnabled is bool &&
+        data.autoPrintPendingPix is bool &&
+        data.soundEnabled is bool &&
+        data.paperWidth in ['80mm', '58mm'] &&
+        data.copies is int && (data.copies == 1 || data.copies == 2) &&
+        data.storeFooterNote is string && data.storeFooterNote.size() <= 140 &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidAdminAuth(data) {
+      return data.keys().hasAll(['passHash', 'updatedAt']) &&
+        data.keys().hasOnly(['passHash', 'updatedAt']) &&
+        data.passHash is string && data.passHash.size() >= 16 && data.passHash.size() <= 128 &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidOrderCounter(data) {
+      return data.keys().hasAll(['seq', 'updatedAt']) &&
+        data.keys().hasOnly(['seq', 'updatedAt']) &&
+        data.seq is int && data.seq >= 1 && data.seq <= 9999999 &&
+        data.updatedAt is timestamp;
+    }
+
+    // 3. Sequential Order Counter
+    match /counters/{counterId} {
+      allow get: if isValidId(counterId) && counterId == 'orders';
+      allow create: if isValidId(counterId) && counterId == 'orders' &&
+        isValidOrderCounter(incoming()) &&
+        incoming().seq == 1 &&
+        incoming().updatedAt == request.time;
+      allow update: if isValidId(counterId) && counterId == 'orders' &&
+        isValidOrderCounter(incoming()) &&
+        incoming().seq == existing().seq + 1 &&
+        incoming().updatedAt == request.time;
+      allow delete: if isValidId(counterId) && counterId == 'orders';
+    }
+
+    // 4. Real-Time Orders Collection
+    match /orders/{orderId} {
+      allow get: if isValidId(orderId);
+      allow list: if resource.data.numeroPedido >= 1 ||
+        resource.data.createdAt >= timestamp.date(2020, 1, 1);
+
+      allow create: if isValidId(orderId) &&
+        isValidOrder(incoming()) &&
+        incoming().status == 'novo' &&
+        incoming().impresso == false &&
+        incoming().impressoCount == 0 &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+
+      allow update: if isValidId(orderId) &&
+        isValidOrder(incoming()) &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().numeroPedido == existing().numeroPedido &&
+        incoming().codigoPedido == existing().codigoPedido &&
+        incoming().updatedAt == request.time && (
+          incoming().diff(existing()).affectedKeys().hasOnly(['impresso', 'impressoCount', 'updatedAt']) ||
+          incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']) ||
+          incoming().diff(existing()).affectedKeys().hasOnly(['pixStatus', 'pixConfirmadoPor', 'pixResumoVerificacao', 'updatedAt']) ||
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'pixStatus',
+            'pixConfirmadoPor',
+            'pixResumoVerificacao',
+            'impresso',
+            'impressoCount',
+            'status',
+            'updatedAt'
+          ])
+        );
+
+      allow delete: if isValidId(orderId);
+    }
+
+    // 5. Public Real-Time Menu Products
+    match /products/{productId} {
+      allow get: if isValidId(productId);
+      allow list: if resource.data.ordem >= 0;
+      allow create, update: if isValidId(productId) &&
+        isValidProduct(incoming()) &&
+        incoming().updatedAt == request.time;
+      allow delete: if isValidId(productId);
+    }
+
+    // 6. Store Settings & Open/Closed Status
+    match /storeSettings/{settingId} {
+      allow get: if isValidId(settingId) && settingId == 'main';
+      allow create, update: if isValidId(settingId) && settingId == 'main' &&
+        isValidStoreSettings(incoming()) &&
+        incoming().updatedAt == request.time;
+    }
+
+    // 7. Admin Password Hash Config
+    match /adminAuth/{docId} {
+      allow get: if isValidId(docId) && docId == 'config';
+      allow create, update: if isValidId(docId) && docId == 'config' &&
+        isValidAdminAuth(incoming()) &&
+        incoming().updatedAt == request.time;
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Remix Remix Burger Prime — Cardápio Digital 2",
+  "description": "Cardápio digital mobile-first da hamburgueria Burger Prime para pedidos rápidos pelo WhatsApp. 2",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
